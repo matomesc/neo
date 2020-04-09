@@ -1,0 +1,33 @@
+{
+  "name": "neo",
+  "version": "1.0.0",
+  "description": "Geonames parser, filter and formatter",
+  "main": "index.js",
+  "bin": "bin/neo",
+  "author": "Mihai Tomescu <matomesc@gmail.com>",
+  "homepage": "https://github.com/matomesc/neo#readme",
+  "keywords": [
+    "geonames",
+    "parse",
+    "export",
+    "dump"
+  ],
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "bin/neo"
+  ],
+  "scripts": {
+    "publish": "",
+    "test": "echo wip"
+  },
+  "dependencies": {
+    "papaparse": "^5.2.0",
+    "unzipper": "^0.10.10",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "np": "^6.2.0",
+    "prettier": "^2.0.4"
+  }
+}

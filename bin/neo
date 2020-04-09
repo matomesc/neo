@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+const argv = require('yargs');
+const { extract } = require('../index');
+
+argv
+  .usage(
+    'Usage: $0 --columns <column> --url <url> --dest <dest> --filter [filter]'
+  )
+  .usage('Extract, filter and write geonames data from <url> to <dest>')
+  .array('columns')
+  .describe('columns', 'columns to select')
+
+  .string('url')
+  .describe('url', 'geonames file url')
+
+  .string('dest')
+  .describe('dest', 'file where to write result')
+
+  .string('filter')
+  .describe('filter', 'filter expression')
+
+  .demandOption(['columns', 'url', 'dest']);
+
+async function main() {
+  const args = argv.parse();
+  try {
+    await extract(args.url, args.dest, args.columns, args.filter);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+main();
