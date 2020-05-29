@@ -50,6 +50,7 @@ const columnIndexToName = {
   17: 'timezone',
   18: 'modificationDate',
 };
+exports.columnIndexToName = columnIndexToName;
 
 const columnNameToIndex = Object.keys(columnIndexToName).reduce((acc, key) => {
   acc[columnIndexToName[key]] = key;
@@ -57,15 +58,37 @@ const columnNameToIndex = Object.keys(columnIndexToName).reduce((acc, key) => {
 }, {});
 
 /**
+ * @param {string} filterExpression
+ * @param {(string|number|boolean)[]} data
+ * @returns {boolean}
+ */
+function testFilterExpression(filterExpression, data) {
+  const filterLines = data.reduce((acc, value, index) => {
+    const encodedValue =
+      typeof value === 'string' ? JSON.stringify(value) : value;
+
+    return [
+      ...acc,
+      `const ${columnIndexToName[index]} = ${encodedValue};`,
+    ];
+  }, []);
+  filterLines.push(`return ${filterExpression};`);
+
+  return runInThisContext(
+    `(function () {${filterLines.join('\n')}})()`
+  );
+}
+
+/**
  * Extract and filter data from a geonames file.
  *
  * @param {string} url
  * @param {string} dest
  * @param {string[]} columns
- * @param {string} [filterExpr]
+ * @param {string} [filterExpression]
  * @returns {Promise<void>}
  */
-exports.extract = (url, dest, columns, filterExpr) => {
+exports.extract = async (url, dest, columns, filterExpression) => {
   const columnIndexes = columns.map((name) => columnNameToIndex[name]);
   const parse = Papa.parse(Papa.NODE_STREAM_INPUT, {
     delimiter: '\t',
@@ -93,19 +116,8 @@ exports.extract = (url, dest, columns, filterExpr) => {
             new Transform({
               objectMode: true,
               transform: (data, _, done) => {
-                if (filterExpr) {
-                  const filterLines = data.reduce((acc, value, index) => {
-                    const encodedValue =
-                      typeof value === 'string' ? `"${value}"` : value;
-                    return [
-                      ...acc,
-                      `const ${columnIndexToName[index]} = ${encodedValue};`,
-                    ];
-                  }, []);
-                  filterLines.push(`return ${filterExpr};`);
-                  const passed = runInThisContext(
-                    `(function () {${filterLines.join('\n')}})()`
-                  );
+                if (filterExpression) {
+                  const passed = testFilterExpression(filterExpression, data);
 
                   if (!passed) {
                     return done(null, '');

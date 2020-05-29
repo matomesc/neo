@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const argv = require('yargs');
-const { extract } = require('../index');
+const { extract, columnIndexToName } = require('../index');
 
 argv
   .usage(
@@ -9,7 +9,10 @@ argv
   )
   .usage('Extract, filter and write geonames data from <url> to <dest>')
   .array('columns')
-  .describe('columns', 'columns to select')
+  .describe(
+    'columns',
+    `columns to select (${Object.values(columnIndexToName).sort().join(', ')})`
+  )
 
   .string('url')
   .describe('url', 'geonames file url')
